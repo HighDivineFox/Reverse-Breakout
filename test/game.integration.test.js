@@ -74,7 +74,7 @@ test("game module launches balls and clears blocks through the fixed-step loop",
 
   await import(`../src/game.js?integration=${Date.now()}`);
 
-  assert.equal(elements.get("#versionValue").textContent, "v0.2.0");
+  assert.equal(elements.get("#versionValue").textContent, "v0.3.0");
   assert.equal(elements.get("#ballsValue").textContent, "0 / 1");
   assert.equal(elements.get("#blocksValue").textContent, 6);
 
