@@ -1,3 +1,5 @@
+import { advanceBall, createBlockSpatialIndex } from "./collision.js";
+
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -75,6 +77,11 @@ const CONFIG = {
     height: 12,
     speed: 132,
     cooldown: 1.75
+  },
+  collision: {
+    cellSize: 64,
+    maxImpactsPerStep: 8,
+    separationEpsilon: 0.001
   },
   colors: ["#4fd1c5", "#f6c85f", "#f28f8f", "#9ca8ff", "#74d680"]
 };
@@ -200,6 +207,7 @@ const state = {
   paddles: [],
   balls: [],
   blocks: [],
+  blockIndex: null,
   levelConfig: null,
   accumulator: 0,
   lastTime: 0,
@@ -228,6 +236,7 @@ function startLevel(level) {
   state.levelConfig = getLevelConfig(level);
   state.balls = [];
   state.blocks = buildBlocks(state.levelConfig);
+  state.blockIndex = createBlockSpatialIndex(state.blocks, CONFIG.collision.cellSize);
   state.paddles = buildPaddles(getStats().paddles);
   state.clearSnapshot = null;
   closeUtilityOverlays();
@@ -339,29 +348,45 @@ function tick(dt) {
   }
 
   for (const ball of state.balls) {
-    ball.x += ball.vx * dt;
-    ball.y += ball.vy * dt;
+    advanceBall(ball, dt, {
+      bounds: {
+        left: CONFIG.stage.wallInset,
+        right: CONFIG.stage.width - CONFIG.stage.wallInset,
+        top: 22,
+        bottom: CONFIG.stage.height - 18
+      },
+      paddles: state.paddles,
+      blockIndex: state.blockIndex,
+      maxImpactsPerStep: CONFIG.collision.maxImpactsPerStep,
+      separationEpsilon: CONFIG.collision.separationEpsilon
+    }, {
+      onPaddleHit: (hitBall, paddle) => {
+        const offset = (hitBall.x - paddle.x) / (paddle.w / 2);
+        hitBall.vx += offset * 95 + paddle.dir * 18;
+        hitBall.vy = Math.abs(hitBall.vy);
+        hitBall.y = paddle.y + paddle.h / 2 + hitBall.r + CONFIG.collision.separationEpsilon;
+      },
+      onBlockHit: (hitBall, block) => {
+        const priorHp = block.hp;
+        block.hp -= stats.damage;
+        hitBall.hp -= 1;
 
-    if (ball.x - ball.r <= CONFIG.stage.wallInset || ball.x + ball.r >= CONFIG.stage.width - CONFIG.stage.wallInset) {
-      ball.x = Math.max(CONFIG.stage.wallInset + ball.r, Math.min(CONFIG.stage.width - CONFIG.stage.wallInset - ball.r, ball.x));
-      ball.vx *= -1;
-    }
-
-    if (ball.y - ball.r <= 22) {
-      ball.y = 22 + ball.r;
-      ball.vy = Math.abs(ball.vy);
-    }
-
-    if (ball.y + ball.r >= CONFIG.stage.height - 18) {
-      ball.y = CONFIG.stage.height - 18 - ball.r;
-      ball.vy = -Math.abs(ball.vy);
-    }
-
-    collideBallWithPaddles(ball);
-    collideBallWithBlocks(ball, stats);
+        if (block.hp <= 0) {
+          const reward = Math.max(1, Math.floor(block.reward * stats.rewardMultiplier));
+          state.currency += reward;
+          state.totalBlockValue += reward;
+          state.blockIndex.remove(block);
+        } else {
+          state.totalBlockValue += Math.max(1, Math.min(priorHp, stats.damage));
+        }
+      }
+    });
   }
 
   state.balls = state.balls.filter(ball => ball.hp > 0);
+  if (state.blockIndex.size !== state.blocks.length) {
+    state.blocks = state.blocks.filter(block => state.blockIndex.has(block));
+  }
   if (state.blocks.length === 0) completeLevel();
 }
 
@@ -381,39 +406,6 @@ function launchBall(paddle, stats) {
     maxHp: stats.ballHp,
     color: paddle.hue
   });
-}
-
-function collideBallWithPaddles(ball) {
-  for (const paddle of state.paddles) {
-    if (!circleRectOverlap(ball, paddle.x - paddle.w / 2, paddle.y - paddle.h / 2, paddle.w, paddle.h)) continue;
-    const offset = (ball.x - paddle.x) / (paddle.w / 2);
-    ball.vx += offset * 95 + paddle.dir * 18;
-    ball.vy = Math.abs(ball.vy);
-    ball.y = paddle.y + paddle.h / 2 + ball.r + 0.1;
-  }
-}
-
-function collideBallWithBlocks(ball, stats) {
-  for (let i = state.blocks.length - 1; i >= 0; i--) {
-    const block = state.blocks[i];
-    if (!circleRectOverlap(ball, block.x, block.y, block.w, block.h)) continue;
-
-    const priorHp = block.hp;
-    block.hp -= stats.damage;
-    ball.hp -= 1;
-    reflectBallFromRect(ball, block);
-
-    if (block.hp <= 0) {
-      const reward = Math.max(1, Math.floor(block.reward * stats.rewardMultiplier));
-      state.currency += reward;
-      state.totalBlockValue += reward;
-      state.blocks.splice(i, 1);
-    } else {
-      state.totalBlockValue += Math.max(1, Math.min(priorHp, stats.damage));
-    }
-
-    if (ball.hp <= 0) break;
-  }
 }
 
 function completeLevel() {
@@ -706,30 +698,6 @@ function frame(time) {
   draw();
   renderUi();
   requestAnimationFrame(frame);
-}
-
-function circleRectOverlap(circle, x, y, w, h) {
-  const nearestX = Math.max(x, Math.min(circle.x, x + w));
-  const nearestY = Math.max(y, Math.min(circle.y, y + h));
-  const dx = circle.x - nearestX;
-  const dy = circle.y - nearestY;
-  return dx * dx + dy * dy <= circle.r * circle.r;
-}
-
-function reflectBallFromRect(ball, rect) {
-  const rectCenterX = rect.x + rect.w / 2;
-  const rectCenterY = rect.y + rect.h / 2;
-  const dx = ball.x - rectCenterX;
-  const dy = ball.y - rectCenterY;
-  const overlapX = rect.w / 2 + ball.r - Math.abs(dx);
-  const overlapY = rect.h / 2 + ball.r - Math.abs(dy);
-  if (overlapX < overlapY) {
-    ball.vx = Math.abs(ball.vx) * Math.sign(dx || 1);
-    ball.x += Math.sign(dx || 1) * overlapX;
-  } else {
-    ball.vy = Math.abs(ball.vy) * Math.sign(dy || 1);
-    ball.y += Math.sign(dy || 1) * overlapY;
-  }
 }
 
 function seededRandom(seed) {

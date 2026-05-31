@@ -75,6 +75,7 @@ The prototype has no build step, external runtime dependencies, or persistence l
 | --- | --- |
 | `index.html` | Declares the canvas and overlay menus |
 | `src/game.js` | Owns configuration, state, fixed-step simulation, canvas rendering, and UI events |
+| `src/collision.js` | Owns swept collision detection, ordered impact resolution, and the block spatial index |
 | `styles/main.css` | Styles the responsive shell, canvas, overlays, and shop cards |
 | `server.mjs` | Serves static files from `http://127.0.0.1:4173/` by default |
 
@@ -82,6 +83,10 @@ The simulation advances at a fixed `1 / 120` second step and renders through
 `requestAnimationFrame`. Block layouts use seeded randomness so a given level has a
 stable board. Ball launches intentionally add a small random angle variance so
 repeated launches do not follow an identical path.
+
+Blocks are indexed in fixed-size spatial cells when each level begins. During a
+simulation step, each ball queries only the cells touched by its swept path and
+resolves contacts in travel order. Ball-to-ball collisions are intentionally omitted.
 
 ## Tuning Reference
 
@@ -106,6 +111,12 @@ Run the syntax gate:
 
 ```powershell
 npm run check
+```
+
+Run the collision regression suite:
+
+```powershell
+npm test
 ```
 
 For a manual pass, start the server with `npm start`, open
