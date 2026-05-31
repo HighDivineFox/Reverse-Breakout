@@ -25,6 +25,8 @@ const ui = {
   pauseButton: document.querySelector("#pauseButton"),
   prestigeButton: document.querySelector("#prestigeButton"),
   sandboxButton: document.querySelector("#sandboxButton"),
+  mobileSandboxButton: document.querySelector("#mobileSandboxButton"),
+  toolbarOverflow: document.querySelector(".toolbar-overflow"),
   closeRunButton: document.querySelector("#closeRunButton"),
   closeSandboxButton: document.querySelector("#closeSandboxButton"),
   confirmPrestigeButton: document.querySelector("#confirmPrestigeButton"),
@@ -186,6 +188,7 @@ const baseUpgrades = Object.fromEntries(UPGRADES.map(upgrade => [upgrade.id, 0])
 const state = {
   mode: "playing",
   paused: false,
+  pageHidden: document.hidden === true,
   simSpeed: 1,
   level: 1,
   highestLevel: 1,
@@ -316,7 +319,7 @@ function getStats() {
 }
 
 function tick(dt) {
-  if (state.mode !== "playing" || state.paused) return;
+  if (state.mode !== "playing" || state.paused || state.pageHidden) return;
   const stats = getStats();
 
   for (const paddle of state.paddles) {
@@ -767,6 +770,7 @@ function formatNumber(value) {
 function closeUtilityOverlays() {
   ui.runOverlay.classList.add("hidden");
   ui.sandboxOverlay.classList.add("hidden");
+  ui.toolbarOverflow.open = false;
 }
 
 function openUtilityOverlay(overlay) {
@@ -776,6 +780,7 @@ function openUtilityOverlay(overlay) {
 
 ui.runButton.addEventListener("click", () => openUtilityOverlay(ui.runOverlay));
 ui.sandboxButton.addEventListener("click", () => openUtilityOverlay(ui.sandboxOverlay));
+ui.mobileSandboxButton.addEventListener("click", () => openUtilityOverlay(ui.sandboxOverlay));
 ui.closeRunButton.addEventListener("click", closeUtilityOverlays);
 ui.closeSandboxButton.addEventListener("click", closeUtilityOverlays);
 
@@ -803,6 +808,12 @@ ui.resetButton.addEventListener("click", () => {
   state.prestigeCurrency = 0;
   state.prestigeUnlocks.clear();
   resetRun();
+});
+
+document.addEventListener("visibilitychange", () => {
+  state.pageHidden = document.hidden === true;
+  state.lastTime = 0;
+  state.accumulator = 0;
 });
 
 resizeCanvas();
