@@ -1,7 +1,8 @@
 import { advanceBall, createBlockSpatialIndex } from "./collision.js";
+import { getDestroyedBlockRewards, incrementBallCombo, resetBallCombo } from "./combo.js";
 import { applyFinalBlockMagnetism } from "./magnetism.js";
 
-const GAME_VERSION = "0.2.0";
+const GAME_VERSION = "0.3.0";
 
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -376,15 +377,17 @@ function tick(dt) {
         hitBall.vy = Math.abs(hitBall.vy);
         hitBall.y = paddle.y + paddle.h / 2 + hitBall.r + CONFIG.collision.separationEpsilon;
       },
+      onWallHit: resetBallCombo,
       onBlockHit: (hitBall, block) => {
         const priorHp = block.hp;
         block.hp -= stats.damage;
         hitBall.hp -= 1;
+        const combo = incrementBallCombo(hitBall);
 
         if (block.hp <= 0) {
-          const reward = Math.max(1, Math.floor(block.reward * stats.rewardMultiplier));
-          state.currency += reward;
-          state.totalBlockValue += reward;
+          const rewards = getDestroyedBlockRewards(block.reward, stats.rewardMultiplier, combo);
+          state.currency += rewards.creditReward;
+          state.totalBlockValue += rewards.prestigeValue;
           state.blockIndex.remove(block);
         } else {
           state.totalBlockValue += Math.max(1, Math.min(priorHp, stats.damage));
@@ -414,6 +417,7 @@ function launchBall(paddle, stats) {
     r: CONFIG.ball.radius,
     hp: stats.ballHp,
     maxHp: stats.ballHp,
+    combo: 0,
     color: paddle.hue
   });
 }
@@ -657,6 +661,13 @@ function drawBalls() {
     ctx.fillRect(ball.x - 10, ball.y - 18, 20, 3);
     ctx.fillStyle = hpRatio > 0.35 ? "#74d680" : "#f97373";
     ctx.fillRect(ball.x - 10, ball.y - 18, 20 * hpRatio, 3);
+
+    if (ball.combo > 1) {
+      ctx.fillStyle = "rgba(232, 237, 247, 0.9)";
+      ctx.font = "11px ui-sans-serif, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(`x${ball.combo}`, ball.x, ball.y - 24);
+    }
   }
 }
 

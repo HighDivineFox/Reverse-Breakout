@@ -305,6 +305,7 @@ export function advanceBall(ball, dt, world, handlers = {}, metrics) {
       handlers.onPaddleHit(ball, earliest.target);
     } else {
       reflect(ball, earliest);
+      if (earliest.type === "wall") handlers.onWallHit?.(ball);
       if (earliest.type === "block") handlers.onBlockHit?.(ball, earliest.target);
     }
 

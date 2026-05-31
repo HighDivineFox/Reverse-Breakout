@@ -1,0 +1,20 @@
+export function incrementBallCombo(ball) {
+  ball.combo = (ball.combo || 0) + 1;
+  return ball.combo;
+}
+
+export function resetBallCombo(ball) {
+  ball.combo = 0;
+}
+
+export function applyComboMultiplier(reward, combo) {
+  return reward * Math.max(1, combo || 0);
+}
+
+export function getDestroyedBlockRewards(blockReward, rewardMultiplier, combo) {
+  const prestigeValue = Math.max(1, Math.floor(blockReward * rewardMultiplier));
+  return {
+    creditReward: applyComboMultiplier(prestigeValue, combo),
+    prestigeValue
+  };
+}

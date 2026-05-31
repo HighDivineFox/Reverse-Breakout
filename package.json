@@ -1,11 +1,11 @@
 {
   "name": "reverse-breakout-incremental",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check src/collision.js && node --check src/magnetism.js && node --check src/game.js && node --check server.mjs",
+    "check": "node --check src/collision.js && node --check src/combo.js && node --check src/magnetism.js && node --check src/game.js && node --check server.mjs",
     "test": "node --test",
     "push": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/push.ps1"
   }

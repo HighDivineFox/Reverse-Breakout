@@ -13,10 +13,12 @@ and sandbox controls for tuning. This document describes implemented behavior on
    paddles near the bottom of the canvas.
 2. Paddles launch balls automatically whenever their cooldown expires and active ball
    capacity is available.
-3. Balls bounce inside the stage. Each block collision deals damage to the block and
-   removes one HP from the ball.
-4. Destroyed blocks grant credits. Clearing the board awards a level-clear bonus and
-   opens the shop.
+3. Balls bounce inside the stage. Each block collision deals damage to the block,
+   removes one HP from the ball, and raises that ball's combo. Touching any stage
+   boundary resets only that ball's combo.
+4. Destroyed blocks grant credits multiplied by the destroying ball's current combo.
+   Combo credits do not increase prestige value. Clearing the board awards a
+   level-clear bonus and opens the shop.
 5. The player buys upgrades and starts the next level.
 6. After reaching level 10, the player can prestige to reset the run and spend
    permanent currency on unlocks.
@@ -77,6 +79,7 @@ The prototype has no build step, external runtime dependencies, or persistence l
 | --- | --- |
 | `index.html` | Declares the canvas and overlay menus |
 | `src/game.js` | Owns configuration, state, fixed-step simulation, canvas rendering, and UI events |
+| `src/combo.js` | Owns per-ball combo updates, resets, and reward multiplication |
 | `src/magnetism.js` | Applies final-block ball steering while preserving ball speed |
 | `src/collision.js` | Owns swept collision detection, ordered impact resolution, and the block spatial index |
 | `styles/main.css` | Styles the responsive shell, canvas, overlays, and shop cards |

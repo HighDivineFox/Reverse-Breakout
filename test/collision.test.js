@@ -95,6 +95,28 @@ test("world wall rebounds consume only the elapsed portion of the step", () => {
   assert.equal(ball.vx, -100);
 });
 
+test("every world boundary rebound invokes the wall-hit callback", () => {
+  const cases = [
+    { x: 10, y: 50, vx: -100, vy: 0 },
+    { x: 90, y: 50, vx: 100, vy: 0 },
+    { x: 50, y: 10, vx: 0, vy: -100 },
+    { x: 50, y: 90, vx: 0, vy: 100 }
+  ];
+
+  for (const overrides of cases) {
+    const ball = createBall(overrides);
+    let wallHits = 0;
+
+    advanceBall(ball, 0.1, createWorld([], {
+      bounds: { left: 0, right: 100, top: 0, bottom: 100 }
+    }), {
+      onWallHit: () => wallHits += 1
+    });
+
+    assert.equal(wallHits, 1);
+  }
+});
+
 test("paddle collision callback preserves the existing steering shape", () => {
   const paddle = { id: "paddle", x: 100, y: 100, w: 80, h: 12, dir: 1 };
   const world = createWorld([], { paddles: [paddle] });
@@ -112,6 +134,19 @@ test("paddle collision callback preserves the existing steering shape", () => {
   assert.equal(ball.vx, 65.5);
   assert.equal(ball.vy, 100);
   assert.ok(ball.y > paddle.y);
+});
+
+test("paddle rebounds do not invoke the wall-hit callback", () => {
+  const paddle = { id: "paddle", x: 100, y: 100, w: 80, h: 12, dir: 1 };
+  const world = createWorld([], { paddles: [paddle] });
+  const ball = createBall({ x: 100, y: 140, vy: -100 });
+  let wallHits = 0;
+
+  advanceBall(ball, 0.1, world, {
+    onWallHit: () => wallHits += 1
+  });
+
+  assert.equal(wallHits, 0);
 });
 
 test("ordered movement can resolve multiple legitimate block hits in one step", () => {
@@ -132,6 +167,28 @@ test("ordered movement can resolve multiple legitimate block hits in one step", 
 
   assert.deepEqual(hits, ["right", "left"]);
   assert.ok(ball.vx > 0);
+});
+
+test("ordered movement reports a wall reset between block hits", () => {
+  const block = { id: "target", x: 30, y: 40, w: 10, h: 20 };
+  const world = createWorld([block], {
+    bounds: { left: 0, right: 100, top: 0, bottom: 100 }
+  });
+  const ball = createBall({ x: 70, vx: -200, combo: 0 });
+  const events = [];
+
+  advanceBall(ball, 0.7, world, {
+    onWallHit: hitBall => {
+      hitBall.combo = 0;
+      events.push("wall");
+    },
+    onBlockHit: hitBall => {
+      hitBall.combo += 1;
+      events.push(`block:${hitBall.combo}`);
+    }
+  });
+
+  assert.deepEqual(events, ["block:1", "wall", "block:1"]);
 });
 
 test("impact safety cap stops pathological movement and records a metric", () => {

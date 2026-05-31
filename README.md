@@ -22,9 +22,10 @@ Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/) in a browser.
 ## How It Works
 
 The active run plays automatically. Each ball loses HP when it hits a block, and a
-launcher creates a replacement when capacity is available. Destroying blocks grants
-credits. Clearing every block opens the shop, where credits can be spent before
-starting the next level.
+launcher creates a replacement when capacity is available. Each ball builds a combo
+by hitting blocks without touching a stage boundary. Destroyed blocks grant credits
+multiplied by that ball's combo. Clearing every block opens the shop, where credits
+can be spent before starting the next level.
 
 The canvas menu provides three panels:
 
@@ -74,6 +75,7 @@ The project is intentionally small:
 | --- | --- |
 | `index.html` | Game shell, canvas, menus, and startup fallback values |
 | `src/game.js` | Game state, simulation, rendering, economy, and upgrades |
+| `src/combo.js` | Per-ball credit combo tracking and reward multiplication |
 | `src/magnetism.js` | Final-block ball steering that preserves ball speed |
 | `src/collision.js` | Swept collision solver and block spatial index |
 | `test/collision.test.js` | Collision correctness and dense-board regression tests |
