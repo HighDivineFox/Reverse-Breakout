@@ -174,12 +174,12 @@ test("ordered movement reports a wall reset between block hits", () => {
   const world = createWorld([block], {
     bounds: { left: 0, right: 100, top: 0, bottom: 100 }
   });
-  const ball = createBall({ x: 70, vx: -200, combo: 0 });
+  const ball = createBall({ x: 70, vx: -200, combo: 1 });
   const events = [];
 
   advanceBall(ball, 0.7, world, {
     onWallHit: hitBall => {
-      hitBall.combo = 0;
+      hitBall.combo = 1;
       events.push("wall");
     },
     onBlockHit: hitBall => {
@@ -188,7 +188,7 @@ test("ordered movement reports a wall reset between block hits", () => {
     }
   });
 
-  assert.deepEqual(events, ["block:1", "wall", "block:1"]);
+  assert.deepEqual(events, ["block:2", "wall", "block:2"]);
 });
 
 test("impact safety cap stops pathological movement and records a metric", () => {
