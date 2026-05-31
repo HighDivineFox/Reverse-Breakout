@@ -24,7 +24,8 @@ Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/) in a browser.
 The active run plays automatically. Each ball loses HP when it hits a block, and a
 launcher creates a replacement when capacity is available. Each ball builds a combo
 by hitting blocks without touching a stage boundary. Destroyed blocks grant credits
-multiplied by that ball's combo. Clearing every block opens the shop, where credits
+multiplied by that ball's combo. Every ball displays its multiplier starting at `x1`.
+Clearing every block opens the shop, where credits
 can be spent before starting the next level.
 
 The canvas menu provides three panels:

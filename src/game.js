@@ -1,8 +1,8 @@
 import { advanceBall, createBlockSpatialIndex } from "./collision.js";
-import { getDestroyedBlockRewards, incrementBallCombo, resetBallCombo } from "./combo.js";
+import { getBallMultiplier, getDestroyedBlockRewards, incrementBallCombo, resetBallCombo } from "./combo.js";
 import { applyFinalBlockMagnetism } from "./magnetism.js";
 
-const GAME_VERSION = "0.3.0";
+const GAME_VERSION = "0.3.1";
 
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -662,12 +662,10 @@ function drawBalls() {
     ctx.fillStyle = hpRatio > 0.35 ? "#74d680" : "#f97373";
     ctx.fillRect(ball.x - 10, ball.y - 18, 20 * hpRatio, 3);
 
-    if (ball.combo > 1) {
-      ctx.fillStyle = "rgba(232, 237, 247, 0.9)";
-      ctx.font = "11px ui-sans-serif, system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText(`x${ball.combo}`, ball.x, ball.y - 24);
-    }
+    ctx.fillStyle = "rgba(232, 237, 247, 0.9)";
+    ctx.font = "11px ui-sans-serif, system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText(`x${getBallMultiplier(ball.combo)}`, ball.x, ball.y - 24);
   }
 }
 

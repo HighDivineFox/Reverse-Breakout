@@ -7,8 +7,12 @@ export function resetBallCombo(ball) {
   ball.combo = 0;
 }
 
+export function getBallMultiplier(combo) {
+  return Math.max(1, combo || 0);
+}
+
 export function applyComboMultiplier(reward, combo) {
-  return reward * Math.max(1, combo || 0);
+  return reward * getBallMultiplier(combo);
 }
 
 export function getDestroyedBlockRewards(blockReward, rewardMultiplier, combo) {
