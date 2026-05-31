@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   applyComboMultiplier,
+  getBallMultiplier,
   getDestroyedBlockRewards,
   incrementBallCombo,
   resetBallCombo
@@ -23,6 +24,12 @@ test("wall resets return a ball combo to zero", () => {
   resetBallCombo(ball);
 
   assert.equal(ball.combo, 0);
+});
+
+test("balls display a one-times multiplier before building a combo", () => {
+  assert.equal(getBallMultiplier(0), 1);
+  assert.equal(getBallMultiplier(1), 1);
+  assert.equal(getBallMultiplier(3), 3);
 });
 
 test("combo multiplier keeps the first block hit at one times rewards", () => {
