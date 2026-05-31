@@ -46,11 +46,27 @@ Run the syntax check:
 npm run check
 ```
 
-Run the collision regression suite:
+Run the automated regression suite:
 
 ```powershell
 npm test
 ```
+
+Publish a new feature branch after the previous pull request has merged:
+
+```powershell
+npm run push -- "Add final-block magnetism" codex/add-final-block-magnetism
+```
+
+For another commit on the current feature branch, omit the branch argument:
+
+```powershell
+npm run push -- "Tune final-block magnetism"
+```
+
+The publish task shows the affected files, asks for confirmation, runs the syntax
+checks and tests, commits the listed files, and pushes the feature branch. It refuses
+to publish directly from `main` or `master`.
 
 The project is intentionally small:
 
@@ -58,6 +74,7 @@ The project is intentionally small:
 | --- | --- |
 | `index.html` | Game shell, canvas, menus, and startup fallback values |
 | `src/game.js` | Game state, simulation, rendering, economy, and upgrades |
+| `src/magnetism.js` | Final-block ball steering that preserves ball speed |
 | `src/collision.js` | Swept collision solver and block spatial index |
 | `test/collision.test.js` | Collision correctness and dense-board regression tests |
 | `styles/main.css` | Layout and visual styling |

@@ -22,6 +22,8 @@ and sandbox controls for tuning. This document describes implemented behavior on
    permanent currency on unlocks.
 
 Balls are removed when their HP reaches zero. They do not expire on a timer.
+When one block remains, its magnetism gently steers active balls toward its center
+without changing their speed.
 
 ## Implemented Systems
 
@@ -75,6 +77,7 @@ The prototype has no build step, external runtime dependencies, or persistence l
 | --- | --- |
 | `index.html` | Declares the canvas and overlay menus |
 | `src/game.js` | Owns configuration, state, fixed-step simulation, canvas rendering, and UI events |
+| `src/magnetism.js` | Applies final-block ball steering while preserving ball speed |
 | `src/collision.js` | Owns swept collision detection, ordered impact resolution, and the block spatial index |
 | `styles/main.css` | Styles the responsive shell, canvas, overlays, and shop cards |
 | `server.mjs` | Serves static files from `http://127.0.0.1:4173/` by default |
@@ -97,6 +100,7 @@ The primary tuning surface is the `CONFIG` object in `src/game.js`:
 | Stage | Canvas dimensions, wall inset, paddle position, block clearance, and block gap |
 | Level | Board zoom, starting rows and columns, grid growth, and grid limits |
 | Economy | Clear bonus, base block reward, and prestige unlock level |
+| Block | Final-block magnetism steering strength |
 | Ball | Radius, HP, speed, damage, launch spread, and launch variance |
 | Paddle | Width, height, movement speed, and launch cooldown |
 
