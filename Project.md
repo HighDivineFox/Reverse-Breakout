@@ -15,7 +15,7 @@ and sandbox controls for tuning. This document describes implemented behavior on
    capacity is available.
 3. Balls bounce inside the stage. Each block collision deals damage to the block,
    removes one HP from the ball, and raises that ball's combo. Touching any stage
-   boundary resets only that ball's combo.
+   boundary resets only that ball's combo to `x1`.
 4. Destroyed blocks grant credits multiplied by the destroying ball's current combo.
    Combo credits do not increase prestige value. Clearing the board awards a
    level-clear bonus and opens the shop.

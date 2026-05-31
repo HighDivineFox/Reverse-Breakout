@@ -1,10 +1,14 @@
 export function incrementBallCombo(ball) {
-  ball.combo = (ball.combo || 0) + 1;
+  ball.combo = getBallMultiplier(ball.combo) + 1;
   return ball.combo;
 }
 
 export function resetBallCombo(ball) {
-  ball.combo = 0;
+  ball.combo = 1;
+}
+
+export function getBallMultiplier(combo) {
+  return Math.max(1, combo || 0);
 }
 
 export function getBallMultiplier(combo) {
