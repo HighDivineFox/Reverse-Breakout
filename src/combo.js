@@ -11,10 +11,6 @@ export function getBallMultiplier(combo) {
   return Math.max(1, combo || 0);
 }
 
-export function getBallMultiplier(combo) {
-  return Math.max(1, combo || 0);
-}
-
 export function applyComboMultiplier(reward, combo) {
   return reward * getBallMultiplier(combo);
 }
