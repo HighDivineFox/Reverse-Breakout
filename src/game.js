@@ -1,9 +1,13 @@
 import { advanceBall, createBlockSpatialIndex } from "./collision.js";
+import { applyFinalBlockMagnetism } from "./magnetism.js";
+
+const GAME_VERSION = "0.2.0";
 
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const ui = {
+  version: document.querySelector("#versionValue"),
   level: document.querySelector("#levelValue"),
   currency: document.querySelector("#currencyValue"),
   prestige: document.querySelector("#prestigeValue"),
@@ -63,6 +67,9 @@ const CONFIG = {
     clearBonusBase: 22,
     blockRewardBase: 2,
     prestigeUnlockLevel: 10
+  },
+  block: {
+    magnetism: 0.35
   },
   ball: {
     radius: 7,
@@ -285,6 +292,7 @@ function buildBlocks(levelConfig) {
         h: blockHeight,
         hp,
         maxHp: hp,
+        magnetism: CONFIG.block.magnetism,
         reward: Math.max(1, Math.floor((CONFIG.economy.blockRewardBase + hp * 0.65) * levelConfig.rewardMultiplier)),
         colorIndex: (row + col) % CONFIG.colors.length
       });
@@ -346,6 +354,8 @@ function tick(dt) {
       paddle.cooldown += stats.cooldown;
     }
   }
+
+  applyFinalBlockMagnetism(state.balls, state.blocks, dt);
 
   for (const ball of state.balls) {
     advanceBall(ball, dt, {
@@ -555,6 +565,7 @@ function renderPrestige() {
 
 function renderUi() {
   const stats = getStats();
+  ui.version.textContent = `v${GAME_VERSION}`;
   ui.level.textContent = state.level;
   ui.currency.textContent = formatInteger(state.currency);
   ui.prestige.textContent = formatInteger(state.prestigeCurrency);
