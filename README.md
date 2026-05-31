@@ -46,12 +46,20 @@ Run the syntax check:
 npm run check
 ```
 
+Run the collision regression suite:
+
+```powershell
+npm test
+```
+
 The project is intentionally small:
 
 | Path | Purpose |
 | --- | --- |
 | `index.html` | Game shell, canvas, menus, and startup fallback values |
 | `src/game.js` | Game state, simulation, rendering, economy, and upgrades |
+| `src/collision.js` | Swept collision solver and block spatial index |
+| `test/collision.test.js` | Collision correctness and dense-board regression tests |
 | `styles/main.css` | Layout and visual styling |
 | `server.mjs` | Minimal static development server |
 
